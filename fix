@@ -4,4 +4,15 @@ plist_path=~/Library/Preferences/com.reincubate.macos.cam.plist
 last_id="$(plutil -extract LastSelectedDeviceID raw -o - $plist_path)"
 key="PeerSettings_$last_id"
 
-plutil -replace $key -data $(plutil -extract $key raw -o - $plist_path | base64 -d | jq '.postProcessingSettings.portraitConfig.backgroundBlurriness = 0 | .backgroundMode = "off"' | base64) $plist_path
+prior_settings=$(plutil -extract $key raw -o - $plist_path | base64 -d)
+echo "Prior settings:"
+echo "- backgroundBlurriness: $(echo $prior_settings | jq '.postProcessingSettings.portraitConfig.backgroundBlurriness')"
+echo "- backgroundMode: $(echo $prior_settings | jq '.backgroundMode')"
+
+echo "Updating backgroundBlurriness and backgroundMode..."
+updated_settings=$(echo $prior_settings | jq '.postProcessingSettings.portraitConfig.backgroundBlurriness = 0 | .backgroundMode = "off"')
+echo "Updated settings:"
+echo "- backgroundBlurriness: $(echo $updated_settings | jq '.postProcessingSettings.portraitConfig.backgroundBlurriness')"
+echo "- backgroundMode: $(echo $updated_settings | jq '.backgroundMode')"
+
+plutil -replace $key -data $(echo $updated_settings | base64) $plist_path
