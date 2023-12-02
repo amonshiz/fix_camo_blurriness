@@ -1,0 +1,7 @@
+#!/bin/bash
+
+plist_path=~/Library/Preferences/com.reincubate.macos.cam.plist
+last_id="$(plutil -extract LastSelectedDeviceID raw -o - $plist_path)"
+key="PeerSettings_$last_id"
+
+plutil -replace $key -data $(plutil -extract $key raw -o - $plist_path | base64 -d | jq '.postProcessingSettings.portraitConfig.backgroundBlurriness = 0 | .backgroundMode = "off"' | base64) $plist_path
